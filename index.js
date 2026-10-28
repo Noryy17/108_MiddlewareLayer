@@ -1,6 +1,7 @@
 import express from 'express'
 import pg from 'pg'
-import Joi from 'joi'
+import Joi, { allow } from 'joi'
+import e from 'express'
 
 const app = express()
 const port = 3000
@@ -12,3 +13,7 @@ const pool = new Pool ({
     database: 'mahasiswa',
     password: 'Qwertyuiop10Q',
 })
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
