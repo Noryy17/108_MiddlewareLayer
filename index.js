@@ -1,6 +1,6 @@
 import express from 'express'
 import pg from 'pg'
-import Joi, { allow } from 'joi'
+import Joi, { allow, valid } from 'joi'
 import e from 'express'
 
 const app = express()
@@ -54,3 +54,10 @@ function errorResponse(res, message, status, details = null) {
         error: details,
     })
 }
+
+const biodataSchema = Joi.object({
+    id: Joi.number().integer().positive(),
+    nama: Joi.string().trim().min(2).max(100).required(),
+    nim: Joi.string().trim().nim(5).max(20).required(),
+    kelas: Joi.string().trim().min(1).max(20).required(),
+})
