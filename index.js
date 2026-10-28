@@ -1,7 +1,7 @@
 import express from 'express'
 import pg from 'pg'
-import Joi, { allow, valid } from 'joi'
-import e from 'express'
+import Joi from 'joi'
+
 
 const app = express()
 const port = 3000
@@ -58,7 +58,7 @@ function errorResponse(res, message, status, details = null) {
 const biodataSchema = Joi.object({
     id: Joi.number().integer().positive(),
     nama: Joi.string().trim().min(2).max(100).required(),
-    nim: Joi.string().trim().nim(5).max(20).required(),
+    nim: Joi.string().trim().min(5).max(20).required(),
     kelas: Joi.string().trim().min(1).max(20).required(),
 })
 
@@ -145,6 +145,39 @@ app.post(
       'Data berhasil ditambahkan',
       result.rows[0],
       201
+    )
+  }
+)
+
+app.put(
+  '/biodata/:id',
+  validateParams(idSchema),
+  validateBody(biodataSchema.fork(
+    ['nama', 'nim', 'kelas'],
+    field => field.required()
+  ).fork(['id'], field => field.forbidden())),
+  async (req, res) => {
+    const { id } = req.params
+    const { nama, nim, kelas } = req.body
+
+    const result = await pool.query(
+      `UPDATE biodata
+      SET nama = $1, nim = $2, kelas = $3
+      WHERE id = $4
+      RETURNING *`,
+      [nama, nim, kelas, id]
+    )
+
+    if (result.rowCount === 0) {
+        return errorResponse(
+            res, 'Data tidak ditemukan wok', 404
+        )
+    }
+
+    return successResponse(
+        res,
+        'Data berhasil diupdate nih',
+        result.rows[0]
     )
   }
 )
